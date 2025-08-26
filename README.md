@@ -36,15 +36,15 @@ Backend em NestJS para o AI Prompt Manager - uma API REST completa para gerencia
 ## 📦 Instalação e Configuração
 
 ### Pré-requisitos
-- Node.js 18+
+- Node.js 18.19.0+ (recomendado: 18.19.0)
 - PostgreSQL 12+
-- npm ou yarn
+- pnpm 8.0.0+
 
 ### Configuração do Ambiente
 
 1. **Instale as dependências:**
 ```bash
-npm install
+pnpm install
 ```
 
 2. **Configure as variáveis de ambiente:**
@@ -56,12 +56,12 @@ cp .env.example .env
 3. **Configure o banco de dados:**
 ```bash
 # O TypeORM criará as tabelas automaticamente em modo desenvolvimento
-npm run start:dev
+pnpm run start:dev
 ```
 
 4. **Execute o seed (opcional):**
 ```bash
-npm run build
+pnpm run build
 node dist/scripts/seed.js
 ```
 
@@ -164,21 +164,21 @@ O seed cria automaticamente:
 
 ```bash
 # Desenvolvimento
-npm run start:dev          # Inicia em modo desenvolvimento
-npm run start:debug        # Inicia em modo debug
+pnpm run start:dev          # Inicia em modo desenvolvimento
+pnpm run start:debug        # Inicia em modo debug
 
 # Produção
-npm run build              # Build da aplicação
-npm run start:prod         # Inicia em modo produção
+pnpm run build              # Build da aplicação
+pnpm run start:prod         # Inicia em modo produção
 
 # Testes
-npm run test               # Executa testes
-npm run test:watch         # Executa testes em modo watch
-npm run test:cov           # Executa testes com cobertura
+pnpm run test               # Executa testes
+pnpm run test:watch         # Executa testes em modo watch
+pnpm run test:cov           # Executa testes com cobertura
 
 # Utilitários
-npm run lint               # Executa linter
-npm run format             # Formata código
+pnpm run lint               # Executa linter
+pnpm run format             # Formata código
 ```
 
 ## 📝 Desenvolvimento
@@ -217,6 +217,24 @@ Esta API foi projetada para funcionar perfeitamente com o frontend Vue.js. Confi
 1. **Base URL**: `http://localhost:4000/api`
 2. **Autenticação**: Envie o JWT no header `Authorization: Bearer TOKEN`
 3. **CORS**: Já configurado para `localhost:5173` e `localhost:3000`
+
+## 📋 Requisitos do Sistema
+
+- **Node.js**: 18.19.0 ou superior
+- **pnpm**: 8.0.0 ou superior
+- **PostgreSQL**: 12 ou superior
+
+### Instalação do pnpm
+```bash
+# Via npm
+npm install -g pnpm
+
+# Via Homebrew (macOS)
+brew install pnpm
+
+# Via winget (Windows)
+winget install pnpm
+```
 
 ## 📚 Documentação Adicional
 
