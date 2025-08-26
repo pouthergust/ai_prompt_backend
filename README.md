@@ -1,13 +1,13 @@
 # AI Prompt Manager API
 
-Backend em Elixir/Phoenix para o AI Prompt Manager - uma API REST completa para gerenciamento de prompts de IA.
+Backend em NestJS para o AI Prompt Manager - uma API REST completa para gerenciamento de prompts de IA.
 
 ## 🚀 Funcionalidades
 
 ### **Autenticação JWT**
 - Registro e login de usuários
 - Autenticação via JWT tokens
-- Proteção de rotas com Guardian
+- Proteção de rotas com Guards
 - Hash seguro de senhas com Bcrypt
 
 ### **Gerenciamento de Prompts**
@@ -19,48 +19,53 @@ Backend em Elixir/Phoenix para o AI Prompt Manager - uma API REST completa para 
 
 ### **API REST**
 - Endpoints RESTful padronizados
-- Validações robustas com Ecto
+- Validações robustas com class-validator
 - Tratamento de erros consistente
 - Suporte a CORS para frontend
 
 ## 🛠️ Stack Tecnológica
 
-- **Elixir** ~> 1.14
-- **Phoenix** ~> 1.7.10
-- **PostgreSQL** como banco de dados
-- **Guardian** para autenticação JWT
-- **Bcrypt** para hash de senhas
-- **CORS Plug** para integração com frontend
+- **NestJS** - Framework Node.js
+- **TypeScript** - Linguagem de programação
+- **PostgreSQL** - Banco de dados
+- **TypeORM** - ORM para TypeScript
+- **JWT** - Autenticação
+- **Bcrypt** - Hash de senhas
+- **Class Validator** - Validação de dados
 
 ## 📦 Instalação e Configuração
 
 ### Pré-requisitos
-- Elixir 1.14+
+- Node.js 18+
 - PostgreSQL 12+
-- Mix (gerenciador de dependências do Elixir)
+- npm ou yarn
 
 ### Configuração do Ambiente
 
-1. **Clone e configure o projeto:**
+1. **Instale as dependências:**
 ```bash
-cd ai_prompt_manager_api
-mix deps.get
+npm install
 ```
 
-2. **Configure o banco de dados:**
+2. **Configure as variáveis de ambiente:**
 ```bash
-# Edite config/dev.exs com suas credenciais do PostgreSQL
-mix ecto.create
-mix ecto.migrate
-mix run priv/repo/seeds.exs
+cp .env.example .env
+# Edite o arquivo .env com suas configurações
 ```
 
-3. **Inicie o servidor:**
+3. **Configure o banco de dados:**
 ```bash
-mix phx.server
+# O TypeORM criará as tabelas automaticamente em modo desenvolvimento
+npm run start:dev
 ```
 
-A API estará disponível em `http://localhost:4000`
+4. **Execute o seed (opcional):**
+```bash
+npm run build
+node dist/scripts/seed.js
+```
+
+A API estará disponível em `http://localhost:4000/api`
 
 ## 🔗 Endpoints da API
 
@@ -91,11 +96,9 @@ PATCH  /api/prompts/:id/favorite       # Toggle favorito
 curl -X POST http://localhost:4000/api/auth/register \
   -H "Content-Type: application/json" \
   -d '{
-    "user": {
-      "name": "João Silva",
-      "email": "joao@example.com",
-      "password": "senha123"
-    }
+    "name": "João Silva",
+    "email": "joao@example.com",
+    "password": "senha123"
   }'
 ```
 
@@ -115,13 +118,11 @@ curl -X POST http://localhost:4000/api/prompts \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer SEU_JWT_TOKEN" \
   -d '{
-    "prompt": {
-      "title": "Meu Prompt",
-      "content": "Conteúdo do prompt...",
-      "category": "Desenvolvimento",
-      "tags": ["python", "código"],
-      "is_favorite": false
-    }
+    "title": "Meu Prompt",
+    "content": "Conteúdo do prompt...",
+    "category": "Desenvolvimento",
+    "tags": ["python", "código"],
+    "isFavorite": false
   }'
 ```
 
@@ -131,25 +132,26 @@ curl -X POST http://localhost:4000/api/prompts \
 - `id` (UUID, PK)
 - `name` (String)
 - `email` (String, único)
-- `password_hash` (String)
-- `inserted_at`, `updated_at`
+- `password` (String)
+- `created_at`, `updated_at`
 
 ### **Tabela Prompts**
 - `id` (UUID, PK)
 - `title` (String)
 - `content` (Text)
-- `category` (String)
+- `category` (Enum)
 - `tags` (Array de Strings)
 - `is_favorite` (Boolean)
 - `user_id` (UUID, FK)
-- `inserted_at`, `updated_at`
+- `created_at`, `updated_at`
 
 ## 🔒 Segurança
 
-- **Autenticação JWT** com Guardian
+- **Autenticação JWT** com Passport
 - **Hash de senhas** com Bcrypt
-- **Validações** robustas nos modelos
+- **Validações** robustas com class-validator
 - **Proteção CORS** configurada
+- **Guards** para proteção de rotas
 - **Associação por usuário** - cada usuário só acessa seus próprios dados
 
 ## 🧪 Contas de Demonstração
@@ -158,56 +160,54 @@ O seed cria automaticamente:
 - **Admin**: `admin@example.com` / `admin123`
 - **Usuário**: `user@example.com` / `user123`
 
-## 🚀 Deploy
+## 🚀 Scripts Disponíveis
 
-### Configuração de Produção
-1. Configure as variáveis de ambiente:
-   - `DATABASE_URL`
-   - `SECRET_KEY_BASE`
-   - `GUARDIAN_SECRET_KEY`
-
-2. Execute as migrações:
 ```bash
-mix ecto.migrate
-```
+# Desenvolvimento
+npm run start:dev          # Inicia em modo desenvolvimento
+npm run start:debug        # Inicia em modo debug
 
-3. Inicie a aplicação:
-```bash
-mix phx.server
+# Produção
+npm run build              # Build da aplicação
+npm run start:prod         # Inicia em modo produção
+
+# Testes
+npm run test               # Executa testes
+npm run test:watch         # Executa testes em modo watch
+npm run test:cov           # Executa testes com cobertura
+
+# Utilitários
+npm run lint               # Executa linter
+npm run format             # Formata código
 ```
 
 ## 📝 Desenvolvimento
 
-### Comandos Úteis
-```bash
-# Executar testes
-mix test
-
-# Console interativo
-iex -S mix
-
-# Resetar banco de dados
-mix ecto.reset
-
-# Gerar nova migração
-mix ecto.gen.migration nome_da_migracao
-```
-
 ### Estrutura do Projeto
 ```
-lib/
-├── ai_prompt_manager_api/          # Contextos de negócio
-│   ├── accounts/                   # Usuários
-│   ├── prompts/                    # Prompts
-│   └── guardian.ex                 # Configuração JWT
-├── ai_prompt_manager_api_web/      # Camada web
-│   ├── controllers/                # Controllers
-│   ├── router.ex                   # Rotas
-│   └── endpoint.ex                 # Configuração HTTP
-priv/
-├── repo/
-│   ├── migrations/                 # Migrações do banco
-│   └── seeds.exs                   # Dados iniciais
+src/
+├── auth/                    # Módulo de autenticação
+│   ├── dto/                 # DTOs de autenticação
+│   ├── guards/              # Guards JWT e Local
+│   ├── strategies/          # Estratégias Passport
+│   ├── auth.controller.ts   # Controller de auth
+│   ├── auth.service.ts      # Service de auth
+│   └── auth.module.ts       # Módulo de auth
+├── users/                   # Módulo de usuários
+│   ├── dto/                 # DTOs de usuário
+│   ├── entities/            # Entidade User
+│   ├── users.service.ts     # Service de usuários
+│   └── users.module.ts      # Módulo de usuários
+├── prompts/                 # Módulo de prompts
+│   ├── dto/                 # DTOs de prompt
+│   ├── entities/            # Entidade Prompt
+│   ├── prompts.controller.ts # Controller de prompts
+│   ├── prompts.service.ts   # Service de prompts
+│   └── prompts.module.ts    # Módulo de prompts
+├── database/                # Configurações de banco
+│   └── seeds/               # Seeds do banco
+├── app.module.ts            # Módulo principal
+└── main.ts                  # Arquivo de entrada
 ```
 
 ## 🔄 Integração com Frontend
@@ -220,10 +220,10 @@ Esta API foi projetada para funcionar perfeitamente com o frontend Vue.js. Confi
 
 ## 📚 Documentação Adicional
 
-- [Phoenix Framework](https://phoenixframework.org/)
-- [Ecto Documentation](https://hexdocs.pm/ecto/)
-- [Guardian Authentication](https://hexdocs.pm/guardian/)
-- [Elixir Getting Started](https://elixir-lang.org/getting-started/introduction.html)
+- [NestJS Documentation](https://docs.nestjs.com/)
+- [TypeORM Documentation](https://typeorm.io/)
+- [Passport.js Documentation](http://www.passportjs.org/)
+- [Class Validator Documentation](https://github.com/typestack/class-validator)
 
 ## 🤝 Contribuição
 
