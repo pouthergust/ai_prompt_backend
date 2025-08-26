@@ -4,6 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { PromptsModule } from './prompts/prompts.module';
+import { HealthModule } from './health/health.module';
 import { User } from './users/entities/user.entity';
 import { Prompt } from './prompts/entities/prompt.entity';
 
@@ -30,6 +31,7 @@ import { Prompt } from './prompts/entities/prompt.entity';
     AuthModule,
     UsersModule,
     PromptsModule,
+    HealthModule,
   ],
 })
 export class AppModule {}
