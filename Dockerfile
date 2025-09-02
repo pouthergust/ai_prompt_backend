@@ -27,4 +27,4 @@ RUN npm install -g pnpm && pnpm install --prod
 
 COPY --from=development /usr/src/app/dist ./dist
 
-CMD ["node", "dist/main"]
+CMD ["node", "dist/src/main"]
