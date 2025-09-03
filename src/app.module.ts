@@ -25,6 +25,9 @@ import { Prompt } from './prompts/entities/prompt.entity';
         entities: [User, Prompt],
         synchronize: configService.get<string>('NODE_ENV') === 'development',
         logging: configService.get<string>('NODE_ENV') === 'development',
+        ssl: {
+          rejectUnauthorized: false,
+        },
       }),
       inject: [ConfigService],
     }),
