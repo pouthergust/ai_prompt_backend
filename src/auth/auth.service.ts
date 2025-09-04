@@ -4,12 +4,15 @@ import { UsersService } from '../users/users.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { LoginDto } from './dto/login.dto';
 import { User } from '../users/entities/user.entity';
+import { ClerkClient } from '@clerk/backend';
+import { Inject } from '@nestjs/common';
 
 @Injectable()
 export class AuthService {
   constructor(
     private usersService: UsersService,
     private jwtService: JwtService,
+    @Inject('CLERK_CLIENT') private clerkClient: ClerkClient,
   ) {}
 
   async validateUser(email: string, password: string): Promise<User | null> {
@@ -79,5 +82,42 @@ export class AuthService {
     return {
       data: userWithoutPassword,
     };
+  }
+
+  async getClerkUserProfile(clerkUserId: string) {
+    try {
+      // Obter informações do usuário do Clerk
+      const clerkUser = await this.clerkClient.users.getUser(clerkUserId);
+      
+      // Verificar se o usuário existe no banco de dados local
+      let user = await this.usersService.findByEmail(clerkUser.emailAddresses[0].emailAddress);
+      
+      // Se o usuário não existir, crie um novo
+      if (!user) {
+        const createUserDto = new CreateUserDto();
+        createUserDto.email = clerkUser.emailAddresses[0].emailAddress;
+        createUserDto.name = `${clerkUser.firstName} ${clerkUser.lastName}`;
+        createUserDto.password = Math.random().toString(36).slice(-8); // Senha aleatória
+        
+        user = await this.usersService.create(createUserDto);
+      }
+      
+      // Remove password from response
+      const { password, ...userWithoutPassword } = user;
+      
+      return {
+        data: {
+          ...userWithoutPassword,
+          clerkId: clerkUser.id,
+          clerkData: {
+            firstName: clerkUser.firstName,
+            lastName: clerkUser.lastName,
+            imageUrl: clerkUser.imageUrl,
+          }
+        },
+      };
+    } catch (error) {
+      throw new UnauthorizedException('Invalid Clerk user');
+    }
   }
 }

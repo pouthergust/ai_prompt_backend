@@ -4,11 +4,11 @@ Backend em NestJS para o AI Prompt Manager - uma API REST completa para gerencia
 
 ## 🚀 Funcionalidades
 
-### **Autenticação JWT**
-- Registro e login de usuários
-- Autenticação via JWT tokens
-- Proteção de rotas com Guards
-- Hash seguro de senhas com Bcrypt
+### **Autenticação com Clerk**
+- Integração com Clerk para autenticação
+- Verificação de tokens JWT do Clerk
+- Proteção de rotas com Guards personalizados
+- Suporte para autenticação legada via JWT (opcional)
 
 ### **Gerenciamento de Prompts**
 - CRUD completo de prompts
@@ -29,8 +29,8 @@ Backend em NestJS para o AI Prompt Manager - uma API REST completa para gerencia
 - **TypeScript** - Linguagem de programação
 - **PostgreSQL** - Banco de dados
 - **TypeORM** - ORM para TypeScript
-- **JWT** - Autenticação
-- **Bcrypt** - Hash de senhas
+- **Clerk** - Autenticação e gerenciamento de usuários
+- **Passport** - Estratégias de autenticação
 - **Class Validator** - Validação de dados
 
 ## 📦 Instalação e Configuração
