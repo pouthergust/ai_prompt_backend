@@ -7,7 +7,16 @@ async function bootstrap() {
   
   // Enable CORS
   app.enableCors({
-    origin: ['http://localhost:5173', 'http://localhost:3000'],
+    origin: [
+      'http://localhost:5173',
+      'http://localhost:3000',
+      // Domínios do Clerk
+      'https://clerk.com',
+      'https://accounts.clerk.dev',
+      // Domínios do Vercel
+      'https://aiprompt-gray.vercel.app',
+      'https://aiprompt-gray-homolog.vercel.app',
+    ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: [
