@@ -34,6 +34,24 @@ logs
 # Tests
 coverage
 .nyc_output
+test
+
+# Documentation
+README.md
+MIGRATION_GUIDE.md
+LICENSE
+
+# TypeORM (legacy - não usado mais com Supabase)
+data-source.ts
+src/database/migrations
+src/database/seeds
+
+# Supabase local development
+supabase/.temp
+supabase/.branches
+
+# Scripts de desenvolvimento
+scripts
 
 # OS
 .DS_Store
