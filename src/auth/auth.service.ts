@@ -1,83 +1,141 @@
-import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
-import { UsersService } from '../users/users.service';
+import { Injectable, UnauthorizedException, ConflictException, Inject } from '@nestjs/common';
+import { SupabaseClient } from '@supabase/supabase-js';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { LoginDto } from './dto/login.dto';
-import { User } from '../users/entities/user.entity';
+import { Database } from '../types/database.types';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private usersService: UsersService,
-    private jwtService: JwtService,
+    @Inject('SUPABASE_CLIENT') private readonly supabase: SupabaseClient<Database>,
   ) {}
 
-  async validateUser(email: string, password: string): Promise<User | null> {
-    const user = await this.usersService.findByEmail(email);
-    
-    if (user && await this.usersService.validatePassword(user, password)) {
-      return user;
+  async register(createUserDto: CreateUserDto) {
+    const { email, password, name } = createUserDto;
+
+    try {
+      // Registrar usuário no Supabase Auth
+      const { data: authData, error: authError } = await this.supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            name,
+          },
+        },
+      });
+
+      if (authError) {
+        if (authError.message.includes('already registered')) {
+          throw new ConflictException('Email já está em uso');
+        }
+        throw new UnauthorizedException(authError.message);
+      }
+
+      // Inserir dados adicionais na tabela users
+      if (authData.user) {
+        const { error: insertError } = await this.supabase
+          .from('users')
+          .insert([{
+            id: authData.user.id,
+            email,
+            name,
+            password: '', // Senha é gerenciada pelo Supabase Auth
+          }]);
+
+        if (insertError) {
+          console.error('Erro ao inserir usuário na tabela:', insertError);
+        }
+      }
+
+      return {
+        user: authData.user,
+        session: authData.session,
+        message: 'Usuário registrado com sucesso',
+      };
+    } catch (error) {
+      if (error instanceof ConflictException || error instanceof UnauthorizedException) {
+        throw error;
+      }
+      throw new UnauthorizedException('Erro interno do servidor');
     }
-    
-    return null;
   }
 
   async login(loginDto: LoginDto) {
-    const user = await this.validateUser(loginDto.email, loginDto.password);
-    
-    if (!user) {
-      throw new UnauthorizedException('Invalid email or password');
+    const { email, password } = loginDto;
+
+    try {
+      const { data, error } = await this.supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        throw new UnauthorizedException('Credenciais inválidas');
+      }
+
+      return {
+        user: data.user,
+        session: data.session,
+        access_token: data.session?.access_token,
+      };
+    } catch (error) {
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+      throw new UnauthorizedException('Erro interno do servidor');
     }
-
-    const payload = { email: user.email, sub: user.id };
-    const token = this.jwtService.sign(payload);
-
-    // Remove password from response
-    const { password, ...userWithoutPassword } = user;
-
-    return {
-      data: {
-        user: userWithoutPassword,
-        token,
-      },
-    };
-  }
-
-  async register(createUserDto: CreateUserDto) {
-    // Check if user already exists
-    const existingUser = await this.usersService.findByEmail(createUserDto.email);
-    if (existingUser) {
-      throw new ConflictException('User with this email already exists');
-    }
-
-    const user = await this.usersService.create(createUserDto);
-    
-    const payload = { email: user.email, sub: user.id };
-    const token = this.jwtService.sign(payload);
-
-    // Remove password from response
-    const { password, ...userWithoutPassword } = user;
-
-    return {
-      data: {
-        user: userWithoutPassword,
-        token,
-      },
-    };
   }
 
   async getProfile(userId: string) {
-    const user = await this.usersService.findById(userId);
-    
-    if (!user) {
-      throw new UnauthorizedException('User not found');
+    try {
+      const { data, error } = await this.supabase
+        .from('users')
+        .select('id, name, email, created_at, updated_at')
+        .eq('id', userId)
+        .single();
+
+      if (error) {
+        throw new UnauthorizedException('Usuário não encontrado');
+      }
+
+      return data;
+    } catch (error) {
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+      throw new UnauthorizedException('Erro interno do servidor');
     }
+  }
 
-    // Remove password from response
-    const { password, ...userWithoutPassword } = user;
+  async validateUser(email: string, password: string): Promise<any> {
+    try {
+      const { data, error } = await this.supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-    return {
-      data: userWithoutPassword,
-    };
+      if (error || !data.user) {
+        return null;
+      }
+
+      return data.user;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  async logout(accessToken: string) {
+    try {
+      const { error } = await this.supabase.auth.signOut();
+      
+      if (error) {
+        throw new UnauthorizedException('Erro ao fazer logout');
+      }
+
+      return { message: 'Logout realizado com sucesso' };
+    } catch (error) {
+      throw new UnauthorizedException('Erro interno do servidor');
+    }
   }
 }
