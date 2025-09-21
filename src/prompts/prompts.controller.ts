@@ -13,11 +13,11 @@ import {
 import { PromptsService } from './prompts.service';
 import { CreatePromptDto } from './dto/create-prompt.dto';
 import { UpdatePromptDto } from './dto/update-prompt.dto';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { SupabaseAuthGuard } from '../auth/guards/supabase-auth.guard';
 import { PromptCategory } from './entities/prompt.entity';
 
 @Controller('prompts')
-@UseGuards(JwtAuthGuard)
+@UseGuards(SupabaseAuthGuard)
 export class PromptsController {
   constructor(private readonly promptsService: PromptsService) {}
 

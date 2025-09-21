@@ -1,8 +1,13 @@
 import { Injectable, UnauthorizedException, ConflictException, Inject } from '@nestjs/common';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { CreateUserDto } from '../users/dto/create-user.dto';
 import { LoginDto } from './dto/login.dto';
 import { Database } from '../types/database.types';
+
+interface RegisterDto {
+  email: string;
+  password: string;
+  name: string;
+}
 
 @Injectable()
 export class AuthService {
@@ -10,8 +15,8 @@ export class AuthService {
     @Inject('SUPABASE_CLIENT') private readonly supabase: SupabaseClient<Database>,
   ) {}
 
-  async register(createUserDto: CreateUserDto) {
-    const { email, password, name } = createUserDto;
+  async register(registerDto: RegisterDto) {
+    const { email, password, name } = registerDto;
 
     try {
       // Registrar usuário no Supabase Auth
@@ -30,22 +35,6 @@ export class AuthService {
           throw new ConflictException('Email já está em uso');
         }
         throw new UnauthorizedException(authError.message);
-      }
-
-      // Inserir dados adicionais na tabela users
-      if (authData.user) {
-        const { error: insertError } = await this.supabase
-          .from('users')
-          .insert([{
-            id: authData.user.id,
-            email,
-            name,
-            password: '', // Senha é gerenciada pelo Supabase Auth
-          }]);
-
-        if (insertError) {
-          console.error('Erro ao inserir usuário na tabela:', insertError);
-        }
       }
 
       return {
@@ -89,17 +78,20 @@ export class AuthService {
 
   async getProfile(userId: string) {
     try {
-      const { data, error } = await this.supabase
-        .from('users')
-        .select('id, name, email, created_at, updated_at')
-        .eq('id', userId)
-        .single();
+      // Buscar dados do usuário diretamente do Supabase Auth
+      const { data: { user }, error } = await this.supabase.auth.getUser();
 
-      if (error) {
+      if (error || !user || user.id !== userId) {
         throw new UnauthorizedException('Usuário não encontrado');
       }
 
-      return data;
+      return {
+        id: user.id,
+        email: user.email,
+        name: user.user_metadata?.name || null,
+        created_at: user.created_at,
+        updated_at: user.updated_at,
+      };
     } catch (error) {
       if (error instanceof UnauthorizedException) {
         throw error;
