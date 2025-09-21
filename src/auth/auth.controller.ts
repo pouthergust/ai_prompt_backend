@@ -1,15 +1,20 @@
 import { Controller, Post, Body, Get, UseGuards, Request } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { CreateUserDto } from '../users/dto/create-user.dto';
 import { LoginDto } from './dto/login.dto';
-import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { SupabaseAuthGuard } from './guards/supabase-auth.guard';
+
+interface RegisterDto {
+  email: string;
+  password: string;
+  name: string;
+}
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('register')
-  register(@Body() createUserDto: CreateUserDto) {
+  register(@Body() createUserDto: RegisterDto) {
     return this.authService.register(createUserDto);
   }
 
@@ -18,7 +23,7 @@ export class AuthController {
     return this.authService.login(loginDto);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(SupabaseAuthGuard)
   @Get('me')
   getProfile(@Request() req) {
     return this.authService.getProfile(req.user.id);
