@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, Inject } from '@nestjs/common';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { Database, Prompt, PromptCategory } from '../types/database.types';
+import { Database, Prompt, PromptCategory, PromptInsert, PromptUpdate } from '../types/database.types';
 import { CreatePromptDto } from './dto/create-prompt.dto';
 import { UpdatePromptDto } from './dto/update-prompt.dto';
 

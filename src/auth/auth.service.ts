@@ -37,6 +37,25 @@ export class AuthService {
         throw new UnauthorizedException(authError.message);
       }
 
+      // Se o usuário foi criado com sucesso, criar também na tabela public.users
+      if (authData.user) {
+        const { error: dbError } = await this.supabase
+          .from('users')
+          .insert({
+            id: authData.user.id,
+            email: authData.user.email,
+            name: name,
+          });
+
+        if (dbError) {
+          console.error('Erro ao criar usuário na tabela users:', dbError);
+          // Não falhar o registro se o usuário já existir na tabela
+          if (!dbError.message.includes('duplicate key')) {
+            throw new UnauthorizedException('Erro ao criar perfil do usuário');
+          }
+        }
+      }
+
       return {
         user: authData.user,
         session: authData.session,

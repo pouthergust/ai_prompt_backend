@@ -11,6 +11,33 @@ export enum PromptCategory {
 export interface Database {
   public: {
     Tables: {
+      users: {
+        Row: {
+          id: string
+          name: string
+          email: string
+          password?: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id: string
+          name: string
+          email: string
+          password?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          email?: string
+          password?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       prompts: {
         Row: {
           id: string
@@ -66,3 +93,7 @@ export interface Database {
 export type Prompt = Database['public']['Tables']['prompts']['Row'];
 export type PromptInsert = Database['public']['Tables']['prompts']['Insert'];
 export type PromptUpdate = Database['public']['Tables']['prompts']['Update'];
+
+export type User = Database['public']['Tables']['users']['Row'];
+export type UserInsert = Database['public']['Tables']['users']['Insert'];
+export type UserUpdate = Database['public']['Tables']['users']['Update'];

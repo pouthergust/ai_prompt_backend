@@ -1,5 +1,5 @@
 import { IsNotEmpty, IsString, IsEnum, IsArray, IsOptional, IsBoolean, MaxLength, MinLength } from 'class-validator';
-import { PromptCategory } from '../entities/prompt.entity';
+import { PromptCategory } from '../../types/database.types';
 
 export class CreatePromptDto {
   @IsNotEmpty()
